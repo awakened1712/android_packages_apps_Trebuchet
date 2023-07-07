@@ -60,6 +60,7 @@ import com.android.launcher3.util.DisplayController;
 
 import java.util.Collections;
 import java.util.List;
+import android.util.Log;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -95,12 +96,16 @@ public class SettingsActivity extends FragmentActivity
     private static final String KEY_SUGGESTIONS = "pref_suggestions";
     private static final String SUGGESTIONS_PACKAGE = "com.google.android.as";
 
+    private boolean restartNeeded;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
         setActionBar(findViewById(R.id.action_bar));
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        restartNeeded = false;
 
         Intent intent = getIntent();
         if (intent.hasExtra(EXTRA_FRAGMENT) || intent.hasExtra(EXTRA_FRAGMENT_ARGS)
@@ -152,7 +157,25 @@ public class SettingsActivity extends FragmentActivity
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { }
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { 
+        switch (key) {
+            case Utilities.KEY_DOCK_SEARCH:
+            case Utilities.KEY_DOCK_THEME:
+            case Utilities.KEY_SEARCH_RADIUS:
+            case Utilities.KEY_DOCK_MUSIC_SEARCH:
+                restartNeeded = true;
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (restartNeeded)
+            android.os.Process.killProcess(android.os.Process.myPid());
+    }
 
     private boolean startPreference(String fragment, Bundle args, String key) {
         if (Utilities.ATLEAST_P && getSupportFragmentManager().isStateSaved()) {
