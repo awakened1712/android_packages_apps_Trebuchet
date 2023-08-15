@@ -424,6 +424,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mLastModifiedText = mLastOriginalText;
             mBreakPointsIntArray = StringMatcherUtility.getListOfBreakpoints(label, MATCHER);
             setText(label);
+            setMaxLines(2);
         }
         if (info.contentDescription != null) {
             setContentDescription(info.isDisabled()
